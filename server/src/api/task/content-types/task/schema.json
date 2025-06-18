@@ -19,8 +19,9 @@
     },
     "project": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::project.project"
+      "relation": "manyToOne",
+      "target": "api::project.project",
+      "onDelete": "cascade"
     },
     "task_status": {
       "type": "relation",
