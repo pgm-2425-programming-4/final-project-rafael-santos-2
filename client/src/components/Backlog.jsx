@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Column from "./Column";
+import Column from "./Column.jsx";
 
 function Board() {
   const [tasksByStatus, setTasksByStatus] = useState({});
@@ -50,19 +50,18 @@ function Board() {
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setPage(1); // terug naar eerste pagina
+    setPage(1); 
   };
 
   return (
     <div>
-      {/* 🔘 Projectkeuze */}
       <div style={{ marginBottom: "1rem" }}>
         {["PGM3", "PGM4"].map((project) => (
           <button
             key={project}
             onClick={() => {
               setActiveProject(project);
-              setPage(1); // pagina resetten bij projectwissel
+              setPage(1); 
             }}
             style={{
               marginRight: "1rem",
@@ -81,7 +80,6 @@ function Board() {
 
       <h2>Project: {activeProject}</h2>
 
-      {/* 📦 Paginering dropdown */}
       <div style={{ marginBottom: "1rem" }}>
         <label>
           Taken per pagina:{" "}
@@ -93,11 +91,9 @@ function Board() {
         </label>
       </div>
 
-      {/* 🕓 Loader / Error */}
-      {loading && <p>🕓 Laden...</p>}
-      {error && <p>❌ Fout: {error}</p>}
+      {loading && <p>Laden...</p>}
+      {error && <p>Fout: {error}</p>}
 
-      {/* 📋 Kanban kolommen */}
       {!loading && !error && (
         <div style={{ display: "flex", gap: "1rem" }}>
           {Object.entries(tasksByStatus).map(([status, tasks]) => (
@@ -106,7 +102,6 @@ function Board() {
         </div>
       )}
 
-      {/* 🔁 Paginatieknoppen */}
       <div style={{ marginTop: "1rem" }}>
         <button onClick={() => setPage(page - 1)} disabled={page === 1}>
           Vorige

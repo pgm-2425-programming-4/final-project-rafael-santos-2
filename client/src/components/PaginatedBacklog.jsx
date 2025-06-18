@@ -10,7 +10,6 @@ function PaginatedBacklog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ hier dus:
   const [activeProject, setActiveProject] = useState("PGM3");
 
   useEffect(() => {
@@ -35,13 +34,12 @@ function PaginatedBacklog() {
     };
 
     fetchTasks();
-  }, [page, pageSize, activeProject]); // ✅ trigger opnieuw bij wijziging project
+  }, [page, pageSize, activeProject]);
 
   return (
     <div>
       <h2>Backlog – Project: {activeProject}</h2>
 
-      {/* Projectkeuze */}
       <div>
         <button onClick={() => setActiveProject("PGM3")}>PGM3</button>
         <button onClick={() => setActiveProject("PGM4")}>PGM4</button>
@@ -56,8 +54,8 @@ function PaginatedBacklog() {
         </select>
       </label>
 
-      {loading && <p>🕓 Laden...</p>}
-      {error && <p>❌ Fout: {error}</p>}
+      {loading && <p>Laden...</p>}
+      {error && <p>Fout: {error}</p>}
 
       {!loading && !error && (
         <>
