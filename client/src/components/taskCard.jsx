@@ -9,7 +9,7 @@ function TaskCard({ task, onDeleted, onUpdated }) {
 
   const handleUpdate = async () => {
     try {
-      const res = await fetch(`http://localhost:1337/api/tasks/${task.id}`, {
+      const res = await fetch(`http://localhost:1337/api/tasks/${task.documentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
