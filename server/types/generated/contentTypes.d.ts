@@ -439,7 +439,7 @@ export interface ApiTaskTask extends Struct.CollectionTypeSchema {
     singularName: 'task';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
