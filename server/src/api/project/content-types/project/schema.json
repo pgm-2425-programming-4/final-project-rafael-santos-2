@@ -18,8 +18,7 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::task.task",
-      "mappedBy": "project",
-      "onDelete": "cascade"
+      "mappedBy": "project"
     }
   }
 }

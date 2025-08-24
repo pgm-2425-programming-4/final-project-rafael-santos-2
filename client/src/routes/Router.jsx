@@ -3,59 +3,72 @@ import {
   createRoute,
   createRouter,
   RouterProvider,
-  Outlet,
-} from '@tanstack/react-router'
+} from '@tanstack/react-router';
 
-import HomePage from '../pages/Home'
-import AboutPage from '../pages/About'
-import ProjectPage from '../pages/Project'
-import BacklogPage from '../pages/Backlog'
-import Root from '../__Root'
-
-
-const rootRoute = createRootRoute({
-  component: Root,
-})
+import Root from '../components/aside.jsx';
+import HomePage from '../pages/Home.jsx';
+import ProjectPage from '../pages/Project.jsx';
+import BacklogPage from '../components/Backlog.jsx';
+import Board from "../components/Board.jsx";
+import ProjectsOverview from '../pages/Project.jsx';
+import AboutPage from '../pages/About.jsx';
 
 
+function BoardPage() {
+  return <Board />;
+}
 
-const indexRoute = createRoute({
-    getParentRoute:() => rootRoute,
-    path: '/',
-    component: HomePage,
+const projectsOverviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects',
+  component: ProjectsOverview,
 });
 
 const aboutRoute = createRoute({
-    getParentRoute:() => rootRoute,
-    path: '/about',
-    component: AboutPage,
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
 });
 
-const BacklogRoute = createRoute({
-    getParentRoute:() => rootRoute,
-    path: '/projects/:projectId/backlog',
-    component: BacklogPage,
+const rootRoute = createRootRoute({
+  component: Root,
 });
 
-
-const ProjectRoute = createRoute({
-    getParentRoute:() => rootRoute,
-    path: '/projects/:projectId',
-    component: ProjectPage,
+const homeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomePage,
 });
 
+const projectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects/$projectId',
+  component: ProjectPage,
+});
+
+const backlogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects/$projectId/backlog',
+  component: BacklogPage,
+});
+
+const boardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/board',
+  component: BoardPage,
+});
 
 const routeTree = rootRoute.addChildren([
-    indexRoute,
-    aboutRoute,
-    ProjectRoute,
-    BacklogRoute,
+  homeRoute,
+  aboutRoute,
+  projectsOverviewRoute,
+  projectRoute,
+  backlogRoute,
+  boardRoute,
 ]);
 
 export const router = createRouter({
-    routeTree,
+  routeTree,
 });
 
-
-export const Router = () => <RouterProvider router={router} />
-
+export const Router = () => <RouterProvider router={router} />;
