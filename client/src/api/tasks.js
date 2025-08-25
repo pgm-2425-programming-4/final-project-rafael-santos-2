@@ -1,7 +1,7 @@
 import { API_URL, API_TOKEN } from "../../constants/constant";
 
-export async function Taskupdate({ id, title, description }) {
-  const res = await fetch(`${API_URL}/tasks/${id}`, {
+export async function Taskupdate({ id, title, description, task_status }) {
+  const res = await fetch(`${API_URL}/taskens/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -11,15 +11,15 @@ export async function Taskupdate({ id, title, description }) {
       data: {
         title,
         description,
+        task_status,
       },
     }),
   });
+  const result = await res.json();
 
   if (!res.ok) {
-    const text = await res.text(); // haal response op als tekst
-    throw new Error(`Update mislukt: ${text}`); // gooi fout met inhoud
+    throw new Error("Update mislukt: " + JSON.stringify(result.error));
   }
 
-  // alleen hier json proberen als het zeker json is
-  return await res.json();
+  return result;
 }

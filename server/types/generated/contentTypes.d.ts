@@ -459,7 +459,7 @@ export interface ApiStatusStatus extends Struct.CollectionTypeSchema {
 export interface ApiTaskTask extends Struct.CollectionTypeSchema {
   collectionName: 'tasks';
   info: {
-    displayName: 'task';
+    displayName: 'Task';
     pluralName: 'tasks';
     singularName: 'task';
   };

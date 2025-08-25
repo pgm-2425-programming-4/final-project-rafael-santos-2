@@ -13,7 +13,6 @@ function PaginatedBacklog() {
   const [activeProject, setActiveProject] = useState("PGM3");
 
   const fetchTasks = async () => {
-    console.log("📡 fetchTasks() wordt aangeroepen...");
     setLoading(true);
     setError(null);
     try {

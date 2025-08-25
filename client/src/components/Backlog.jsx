@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
+import TaskDialog from "../components/TaskDialog.jsx";
+import TaskCard from "../components/TaskCard.jsx"; 
 
 function BacklogPage() {
   const { projectId } = useParams({ from: "/projects/$projectId/backlog" });
@@ -7,8 +9,10 @@ function BacklogPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [pageCount, setPageCount] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -24,6 +28,7 @@ function BacklogPage() {
       const data = await response.json();
       setTasks(data.data || []);
       setPageCount(data.meta.pagination.pageCount);
+      setTotalCount(data.meta.pagination.total);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -38,6 +43,7 @@ function BacklogPage() {
   return (
     <div>
       <h2>Backlog voor project: {projectId}</h2>
+
       <Link
         to="/projects/$projectId"
         params={{ projectId }}
@@ -51,7 +57,7 @@ function BacklogPage() {
           textDecoration: "none",
         }}
       >
-        ← Terug naar projectpagina
+        Terug naar projectpagina
       </Link>
 
       <div style={{ marginBottom: "1rem" }}>
@@ -70,7 +76,9 @@ function BacklogPage() {
           </select>
         </label>
       </div>
-
+      <p>
+        Totaal aantal backlog-taken: <strong>{totalCount}</strong>
+      </p>
       {loading && <p>Laden...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
@@ -80,42 +88,11 @@ function BacklogPage() {
             <p>Geen backlog-taken gevonden.</p>
           ) : (
             tasks.map((task) => (
-              <div
+              <TaskCard
                 key={task.id}
-                style={{
-                  backgroundColor: "#f9f9f9",
-                  padding: "1rem",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                }}
-              >
-                <strong>{task.title}</strong>
-                <p>{task.description}</p>
-                {task.labels?.data?.length > 0 && (
-                  <div
-                    style={{
-                      marginTop: "0.5rem",
-                      display: "flex",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    {task.labels.data.map((label) => (
-                      <span
-                        key={label.id}
-                        style={{
-                          backgroundColor: "#000",
-                          color: "#fff",
-                          padding: "2px 8px",
-                          borderRadius: "999px",
-                          fontSize: "0.8rem",
-                        }}
-                      >
-                        {label.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                task={task}
+                onClick={() => setSelectedTask(task)}
+              />
             ))
           )}
         </div>
@@ -132,6 +109,14 @@ function BacklogPage() {
           Volgende
         </button>
       </div>
+
+      {selectedTask && (
+        <TaskDialog
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onRefresh={fetchTasks}
+        />
+      )}
     </div>
   );
 }

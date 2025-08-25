@@ -92,5 +92,4 @@ function TaskDialog({ task, onClose, onRefresh }) {
     </div>
   );
 }
-
 export default TaskDialog;

@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import TaskForm from "./TaskForm.jsx";
 import TaskCard from "./TaskCard.jsx";
 import TaskDialog from "./TaskDialog.jsx";
+import TaskFilterPanel from "./TaskFilterPanel.jsx";
 
 function Board({ activeProject }) {
   const [tasksByStatus, setTasksByStatus] = useState({});
@@ -11,6 +12,7 @@ function Board({ activeProject }) {
   const [projectList, setProjectList] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState({ title: "", label: "" });
 
   const currentProject = projectList.find((p) => p.name === activeProject);
 
@@ -36,9 +38,23 @@ function Board({ activeProject }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `http://localhost:1337/api/tasks?populate=*&filters[project][name][$eq]=${activeProject}&filters[task_status][name][$ne]=Backlog`
-      );
+      const queryParts = [
+        `filters[project][name][$eq]=${activeProject}`,
+        `filters[task_status][name][$ne]=Backlog`
+      ];
+
+      if (filters.title) {
+        queryParts.push(`filters[title][$containsi]=${encodeURIComponent(filters.title)}`);
+      }
+
+      if (filters.label) {
+        queryParts.push(`filters[labels][name][$eq]=${encodeURIComponent(filters.label)}`);
+      }
+
+      const query = queryParts.join("&");
+
+      const res = await fetch(`http://localhost:1337/api/tasks?populate=*&${query}`);
+
       if (!res.ok) throw new Error("Fout bij ophalen taken");
 
       const data = await res.json();
@@ -64,7 +80,7 @@ function Board({ activeProject }) {
     } finally {
       setLoading(false);
     }
-  }, [activeProject]);
+  }, [activeProject, filters]);
 
   useEffect(() => {
     fetchTasks();
@@ -73,7 +89,6 @@ function Board({ activeProject }) {
   return (
     <div>
       <h1>Kanban View</h1>
-
       <div
         style={{
           display: "flex",
@@ -83,12 +98,11 @@ function Board({ activeProject }) {
         }}
       >
         <h2 style={{ margin: 0 }}>Project: {activeProject}</h2>
-
         <div style={{ display: "flex", gap: "1rem" }}>
           <button
             onClick={() => setShowForm((prev) => !prev)}
             style={{
-              backgroundColor: "#000000ff",
+              backgroundColor: "#6c63ff",
               color: "#fff",
               padding: "0.5rem 1rem",
               border: "none",
@@ -114,6 +128,8 @@ function Board({ activeProject }) {
           </Link>
         </div>
       </div>
+
+      <TaskFilterPanel onFilterChange={setFilters} />
 
       {showForm && (
         <TaskForm currentProject={currentProject} refresh={fetchTasks} />

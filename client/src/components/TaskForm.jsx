@@ -10,7 +10,6 @@ function TaskForm({ currentProject, refresh }) {
 
   const queryClient = useQueryClient();
 
-  // ✅ Statussen ophalen
   const {
     data: statusData,
     isLoading: statusLoading,
@@ -24,7 +23,6 @@ function TaskForm({ currentProject, refresh }) {
     },
   });
 
-  // ✅ Labels ophalen
   const {
     data: labelData,
     isLoading: labelLoading,
@@ -38,7 +36,6 @@ function TaskForm({ currentProject, refresh }) {
     },
   });
 
-  // ✅ Taak aanmaken
   const createTask = useMutation({
     mutationFn: async (newTask) => {
       const res = await fetch("http://localhost:1337/api/tasks", {
@@ -63,7 +60,6 @@ function TaskForm({ currentProject, refresh }) {
     },
   });
 
-  // ✅ Nieuw label toevoegen
   const handleAddNewLabel = async () => {
     if (!newLabel.trim()) return;
 
@@ -91,7 +87,6 @@ function TaskForm({ currentProject, refresh }) {
     }
   };
 
-  // ✅ Form verzenden
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !selectedStatus) {
