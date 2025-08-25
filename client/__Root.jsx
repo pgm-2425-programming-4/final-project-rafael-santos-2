@@ -8,7 +8,7 @@ export default function Root() {
         <img src="/vite.svg" alt="Jammin logo" />
       </header>
       <main>
-        <Outlet /> {/* Hier worden subroutes gerenderd */}
+        <Outlet />
       </main>
     </div>
   );

@@ -1,42 +1,28 @@
 import React, { useEffect, useState } from "react";
-// import Column from "./Column.jsx";
+import { Link, useParams } from "@tanstack/react-router";
 
-function Board() {
-  const [tasksByStatus, setTasksByStatus] = useState({});
-  const [activeProject, setActiveProject] = useState("PGM3");
-
+function BacklogPage() {
+  const { projectId } = useParams({ from: "/projects/$projectId/backlog" });
+  const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [pageCount, setPageCount] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchTasks = async () => {
-    
     setLoading(true);
     setError(null);
+
     try {
       const response = await fetch(
-        `http://localhost:1337/api/tasks?populate=*&filters[project][name][$eq]=${activeProject}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+        `http://localhost:1337/api/tasks?populate=*&filters[project][name][$eq]=${projectId}&filters[task_status][name][$eq]=Backlog&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
       );
-      if (!response.ok) throw new Error("Fout bij ophalen taken");
+
+      if (!response.ok) throw new Error("Fout bij het ophalen van taken");
 
       const data = await response.json();
-      const grouped = {
-        "To do": [],
-        "In progress": [],
-        "Ready for review": [],
-        Done: [],
-      };
-
-      data.data.forEach((task) => {
-        const status = task.task_status?.name || "To do";
-        if (grouped[status]) {
-          grouped[status].push(task);
-        }
-      });
-
-      setTasksByStatus(grouped);
+      setTasks(data.data || []);
       setPageCount(data.meta.pagination.pageCount);
     } catch (err) {
       setError(err.message);
@@ -44,46 +30,40 @@ function Board() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchTasks();
-  }, [activeProject, page, pageSize]);
-
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setPage(1);
-  };
+  }, [projectId, page, pageSize]);
 
   return (
     <div>
-      <div style={{ marginBottom: "1rem" }}>
-        {["PGM3", "PGM4"].map((project) => (
-          <button
-            key={project}
-            onClick={() => {
-              setActiveProject(project);
-              setPage(1);
-            }}
-            style={{
-              marginRight: "1rem",
-              background: activeProject === project ? "black" : "lightgray",
-              color: activeProject === project ? "white" : "black",
-              padding: "0.5rem 1rem",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            {project}
-          </button>
-        ))}
-      </div>
-
-      <h2>Project: {activeProject}</h2>
+      <h2>Backlog voor project: {projectId}</h2>
+      <Link
+        to="/projects/$projectId"
+        params={{ projectId }}
+        style={{
+          display: "inline-block",
+          marginBottom: "1rem",
+          padding: "0.5rem 1rem",
+          backgroundColor: "#007bff",
+          color: "white",
+          borderRadius: "4px",
+          textDecoration: "none",
+        }}
+      >
+        ← Terug naar projectpagina
+      </Link>
 
       <div style={{ marginBottom: "1rem" }}>
         <label>
           Taken per pagina:{" "}
-          <select value={pageSize} onChange={handlePageSizeChange}>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+          >
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={15}>15</option>
@@ -92,13 +72,52 @@ function Board() {
       </div>
 
       {loading && <p>Laden...</p>}
-      {error && <p>Fout: {error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <div style={{ display: "flex", gap: "1rem" }}>
-          {Object.entries(tasksByStatus).map(([status, tasks]) => (
-            <Column key={status} title={status} tasks={tasks} refresh={fetchTasks} />
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {tasks.length === 0 ? (
+            <p>Geen backlog-taken gevonden.</p>
+          ) : (
+            tasks.map((task) => (
+              <div
+                key={task.id}
+                style={{
+                  backgroundColor: "#f9f9f9",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                }}
+              >
+                <strong>{task.title}</strong>
+                <p>{task.description}</p>
+                {task.labels?.data?.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: "0.5rem",
+                      display: "flex",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    {task.labels.data.map((label) => (
+                      <span
+                        key={label.id}
+                        style={{
+                          backgroundColor: "#000",
+                          color: "#fff",
+                          padding: "2px 8px",
+                          borderRadius: "999px",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        {label.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -117,4 +136,4 @@ function Board() {
   );
 }
 
-export default Board;
+export default BacklogPage;

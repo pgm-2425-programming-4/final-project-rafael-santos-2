@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
-import Column from "./column.jsx";
+import { Link } from '@tanstack/react-router';
 import TaskForm from "./TaskForm.jsx";
+import TaskCard from "./TaskCard.jsx";
+import TaskDialog from "./TaskDialog.jsx";
 
 function Board({ activeProject }) {
   const [tasksByStatus, setTasksByStatus] = useState({});
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [pageCount, setPageCount] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [projectList, setProjectList] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   const currentProject = projectList.find((p) => p.name === activeProject);
 
@@ -18,12 +19,10 @@ function Board({ activeProject }) {
       try {
         const res = await fetch("http://localhost:1337/api/projects");
         const data = await res.json();
-
         const projects = data.data.map((p) => ({
           id: p.id,
           name: p.attributes?.name || p.name,
         }));
-
         setProjectList(projects);
       } catch (err) {
         console.error("Fout bij ophalen projecten:", err);
@@ -34,33 +33,25 @@ function Board({ activeProject }) {
   }, []);
 
   const fetchTasks = useCallback(async () => {
-
     setLoading(true);
     setError(null);
     try {
-      const backlogRes = await fetch(
-        `http://localhost:1337/api/tasks?populate=*&filters[project][name][$eq]=${activeProject}&filters[task_status][name][$eq]=Backlog&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
-      );
-      if (!backlogRes.ok) throw new Error("Fout bij ophalen backlog");
-      const backlogData = await backlogRes.json();
-      const backlogTasks = backlogData.data;
-
-      const otherRes = await fetch(
+      const res = await fetch(
         `http://localhost:1337/api/tasks?populate=*&filters[project][name][$eq]=${activeProject}&filters[task_status][name][$ne]=Backlog`
       );
-      if (!otherRes.ok) throw new Error("Fout bij ophalen andere taken");
-      const otherData = await otherRes.json();
-      const otherTasks = otherData.data;
+      if (!res.ok) throw new Error("Fout bij ophalen taken");
+
+      const data = await res.json();
+      const tasks = data.data;
 
       const grouped = {
-        Backlog: backlogTasks,
         "To do": [],
         "In progress": [],
         "Ready for review": [],
         Done: [],
       };
 
-      otherTasks.forEach((task) => {
+      tasks.forEach((task) => {
         const status = task.task_status?.name || "To do";
         if (grouped[status]) {
           grouped[status].push(task);
@@ -68,68 +59,93 @@ function Board({ activeProject }) {
       });
 
       setTasksByStatus(grouped);
-      setPageCount(backlogData.meta.pagination.pageCount);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [activeProject, page, pageSize]);
+  }, [activeProject]);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setPage(1);
-  };
-
   return (
     <div>
       <h1>Kanban View</h1>
-      <h2>Project: {activeProject}</h2>
 
-      <TaskForm currentProject={currentProject} refresh={fetchTasks} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Project: {activeProject}</h2>
 
-      <div style={{ margin: "1rem 0" }}>
-        <label>
-          Taken per pagina:{" "}
-          <select value={pageSize} onChange={handlePageSizeChange}>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-          </select>
-        </label>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <button
+            onClick={() => setShowForm((prev) => !prev)}
+            style={{
+              backgroundColor: "#000000ff",
+              color: "#fff",
+              padding: "0.5rem 1rem",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            {showForm ? "Annuleer" : "Nieuwe taak toevoegen"}
+          </button>
+
+          <Link
+            to={`/projects/${activeProject}/backlog`}
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: "#6366f1",
+              color: "#fff",
+              borderRadius: "6px",
+              textDecoration: "none",
+              display: "inline-block",
+            }}
+          >
+            Bekijk Backlog
+          </Link>
+        </div>
       </div>
 
+      {showForm && (
+        <TaskForm currentProject={currentProject} refresh={fetchTasks} />
+      )}
+
       {loading && <p>Laden...</p>}
-      {error && <p>Fout: {error}</p>}
+      {error && <p style={{ color: "red" }}>Fout: {error}</p>}
 
       {!loading && !error && (
         <div style={{ display: "flex", gap: "1rem" }}>
           {Object.entries(tasksByStatus).map(([status, tasks]) => (
-            <Column
-              key={status}
-              title={status}
-              tasks={tasks}
-              refresh={fetchTasks}
-            />
+            <div key={status} style={{ flex: 1 }}>
+              <h3>{status}</h3>
+              {tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onClick={() => setSelectedTask(task)}
+                />
+              ))}
+            </div>
           ))}
         </div>
       )}
 
-      <div style={{ marginTop: "1rem" }}>
-        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
-          Vorige
-        </button>
-        <span style={{ margin: "0 1rem" }}>
-          Pagina {page} van {pageCount}
-        </span>
-        <button onClick={() => setPage(page + 1)} disabled={page === pageCount}>
-          Volgende
-        </button>
-      </div>
+      {selectedTask && (
+        <TaskDialog
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onRefresh={fetchTasks}
+        />
+      )}
     </div>
   );
 }

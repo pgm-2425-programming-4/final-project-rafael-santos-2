@@ -26,6 +26,12 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::status.status"
+    },
+    "labels": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::label.label",
+      "mappedBy": "tasks"
     }
   }
 }

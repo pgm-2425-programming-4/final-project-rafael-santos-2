@@ -4,7 +4,8 @@ import Aside from "./components/aside";
 
 import HomePage from "./pages/Home";
 import About from "./pages/About";
-import ProjectPage from "./pages/Projects";
+import ProjectPage from "./pages/Projects"; 
+
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<About />} />
+            <Route path="/projects/:id" element={<ProjectPage />} />
           </Routes>
         </div>
       </main>
