@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
-import TaskDialog from "../components/TaskDialog.jsx";
-import TaskCard from "../components/TaskCard.jsx"; 
+import TaskDialog from "./TaskDialog.jsx";
+import TaskCard from "./taskCard.jsx"; 
 
 function BacklogPage() {
   const { projectId } = useParams({ from: "/projects/$projectId/backlog" });

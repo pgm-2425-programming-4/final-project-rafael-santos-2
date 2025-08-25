@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from '@tanstack/react-router';
 import TaskForm from "./TaskForm.jsx";
-import TaskCard from "./TaskCard.jsx";
-import TaskDialog from "./TaskDialog.jsx";
+import TaskCard from "./taskCard.jsx";
+ import TaskDialog from "./TaskDialog.jsx";
 import TaskFilterPanel from "./TaskFilterPanel.jsx";
 
 function Board({ activeProject }) {
