@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Router } from "../src/routes/router.jsx";
+import { Router } from "./routes/router";
 
 import {
   QueryClient,
